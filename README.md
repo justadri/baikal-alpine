@@ -53,3 +53,8 @@ the container already has both driver sets installed.
   you're managing permissions yourself on the mounted volumes.
 - Rebuild to bump the Baikal version: `docker compose build --build-arg
   BAIKAL_VERSION=x.y.z`.
+
+
+Made possible by the work of [sabre.io](https://github.com/sabre-io/Baikal) 
+and [ckulka](https://github.com/ckulka/baikal-docker) with substantial help
+from [Claude](https://claude.ai)
