@@ -1,5 +1,9 @@
 # baikal-alpine
 
+[![Docker Image CI](https://github.com/justadri/baikal-alpine/actions/workflows/docker-image.yml/badge.svg)](https://github.com/justadri/baikal-alpine/actions/workflows/docker-image.yml)
+[![GHCR](https://img.shields.io/badge/ghcr.io-justadri%2Fbaikal--alpine-blue?logo=github)](https://github.com/justadri/baikal-alpine/pkgs/container/baikal-alpine)
+[![Baikal](https://img.shields.io/badge/baikal-0.11.1-informational)](https://github.com/sabre-io/Baikal/releases/tag/0.11.1)
+
 A single-container image for [Baikal](https://github.com/sabre-io/Baikal)
 (CalDAV/CardDAV server), built on `php:8.4-fpm-alpine` + nginx, supervised
 by [s6-overlay](https://github.com/just-containers/s6-overlay).
