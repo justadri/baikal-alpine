@@ -1,0 +1,8 @@
+#!/bin/sh
+# Legacy s6 services.d has no built-in dependency ordering, so wait briefly
+# for php-fpm's socket before nginx starts routing to it.
+for i in $(seq 1 30); do
+    [ -S /run/php-fpm.sock ] && break
+    sleep 0.5
+done
+exec nginx -g "daemon off;"

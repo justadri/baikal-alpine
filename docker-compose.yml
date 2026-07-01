@@ -1,0 +1,42 @@
+services:
+  baikal:
+    build: .
+    # Or, once you've pushed it somewhere:
+    # image: your-registry/baikal-alpine:latest
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      TZ: America/New_York
+      # --- mail (pick one) -----------------------------------------
+      SMTP_HOST: smtp.example.com
+      SMTP_PORT: "587"
+      SMTP_USER: baikal@example.com
+      SMTP_PASS: changeme
+      SMTP_FROM: baikal@example.com
+      # MSMTPRC: |
+      #   defaults
+      #   tls on
+      #   account default
+      #   host smtp.example.com
+      #   ...
+    volumes:
+      - baikal_config:/var/www/baikal/config
+      - baikal_specific:/var/www/baikal/Specific
+
+  # Uncomment if you want MySQL instead of the default SQLite backend.
+  # db:
+  #   image: mysql:8.4
+  #   restart: unless-stopped
+  #   environment:
+  #     MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+  #     MYSQL_DATABASE: baikal
+  #     MYSQL_USER: baikal
+  #     MYSQL_PASSWORD: changeme
+  #   volumes:
+  #     - baikal_db:/var/lib/mysql
+
+volumes:
+  baikal_config:
+  baikal_specific:
+  # baikal_db:
