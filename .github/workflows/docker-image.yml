@@ -77,6 +77,9 @@ jobs:
     needs: build
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
     steps:
       - name: Log in to GHCR
         uses: docker/login-action@v3
