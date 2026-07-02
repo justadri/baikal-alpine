@@ -54,28 +54,32 @@ the container already has both driver sets installed.
 
 ## Image tags
 
-Published to both `ghcr.io/justadri/baikal-alpine` and `justadri/baikal-alpine`:
+Published to both `ghcr.io/justadri/baikal-alpine` and `justadri/baikal-alpine`
+on every push to `main`:
 
-| Tag | When it's built |
+| Tag | Meaning |
 | --- | --- |
-| `latest` | Every push to `main` |
-| `main` | Every push to `main` |
-| `<short-sha>` | Every push to `main` |
-| `x.y.z` (e.g. `0.11.1`) | Pushing a matching git tag — pins to that exact Baikal version |
+| `latest` | The current `main` |
+| `x.y.z` (e.g. `0.11.1`) | Whatever `ARG BAIKAL_VERSION` in the Dockerfile currently is — moves with `main`, doesn't require a git tag. Infra-only fixes (nginx config, php-fpm tweaks, etc.) republish under the *same* version number until you actually bump `BAIKAL_VERSION`. |
+| `<short-sha>` | Pinned to that exact commit, for rollback/debugging |
+
+`latest` and the version tag always point at the same image.
+
+A separate git tag matching `BAIKAL_VERSION` (e.g. `git tag 0.11.1`) is
+optional — it doesn't change what gets published (that already happens on
+the `main` push), it just marks the point in history as a named release
+and, via GitHub Releases, gives you changelog notes. See below.
 
 ## Releasing a new version
 
-1. Bump `ARG BAIKAL_VERSION` in the `Dockerfile` to the new Baikal release,
-   commit, and merge to `main` as usual.
-2. Tag and push:
+1. Bump `ARG BAIKAL_VERSION` in the `Dockerfile`, commit, and merge to
+   `main` — this alone publishes `latest` and the new version tag.
+2. Optionally mark the release point in git history:
    ```fish
    git tag 0.11.2
    git push origin 0.11.2
    ```
-   CI picks up the tag push, builds with `BAIKAL_VERSION=0.11.2` baked in
-   (overriding the Dockerfile default so the tag is always authoritative
-   even if step 1 was missed), and pushes `0.11.2` to both registries.
-3. Optionally turn it into a GitHub Release:
+3. Optionally turn that into a GitHub Release:
    ```fish
    gh release create 0.11.2 --title 0.11.2 --generate-notes
    ```
