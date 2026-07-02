@@ -7,6 +7,12 @@ FROM php:${PHP_VERSION}-fpm-alpine
 ARG BAIKAL_VERSION=0.11.1
 ARG S6_OVERLAY_VERSION=3.2.0.2
 
+# these pin the minimum versions we force via `composer require` after unpacking,
+# to pick up security fixes without waiting on a new Baikal release.
+# see the composer update step below for details.
+ARG TWIG_VERSION=^3.27.0
+ARG SYMFONY_YAML_VERSION=^7.4.12
+
 LABEL org.opencontainers.image.title="baikal-alpine" \
       org.opencontainers.image.description="Baikal (CalDAV/CardDAV server) on php:8.4-fpm-alpine + nginx, supervised by s6-overlay" \
       org.opencontainers.image.source="https://github.com/justadri/baikal-alpine" \
@@ -65,6 +71,23 @@ RUN wget -qO /tmp/baikal.zip "https://github.com/sabre-io/Baikal/releases/downlo
     rm -f /tmp/baikal.zip && \
     mkdir -p /var/www/baikal/Specific/db && \
     chown -R nginx:nginx /var/www/baikal
+
+# --- dependency patch: bump twig/twig and symfony/yaml past known CVEs --
+# fetch the actual composer.json from the matching git tag first,
+# then require against that real manifest.
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+ENV COMPOSER_ALLOW_SUPERUSER=1
+RUN apk add --no-cache --virtual .composer-deps git && \
+    cd /var/www/baikal && \
+    wget -qO composer.json "https://raw.githubusercontent.com/sabre-io/Baikal/${BAIKAL_VERSION}/composer.json" && \
+    composer require --no-interaction --no-progress --optimize-autoloader \
+        "twig/twig:${TWIG_VERSION}" \
+        "symfony/yaml:${SYMFONY_YAML_VERSION}" && \
+    composer clear-cache && \
+    chown -R nginx:nginx vendor composer.json && \
+    [ -f composer.lock ] && chown nginx:nginx composer.lock; \
+    apk del .composer-deps && \
+    rm -f /usr/bin/composer
 
 # --- config ------------------------------------------------------------
 COPY docker/nginx.conf /etc/nginx/http.d/default.conf
