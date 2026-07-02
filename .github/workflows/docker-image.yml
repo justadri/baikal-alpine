@@ -85,7 +85,11 @@ jobs:
 
   smoke-test:
     needs: build
-    if: github.event_name == 'push'
+    # Explicit `if:` overrides the default "only run if needs succeeded"
+    # check, so success() has to be spelled out here or this'll try to run
+    # (and blow up on an empty needs.build.outputs.image) even when build
+    # fails.
+    if: success() && github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -125,7 +129,7 @@ jobs:
 
   dockerhub-description:
     needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
