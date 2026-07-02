@@ -77,8 +77,8 @@ RUN wget -qO /tmp/baikal.zip "https://github.com/sabre-io/Baikal/releases/downlo
 # then require against that real manifest.
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 ENV COMPOSER_ALLOW_SUPERUSER=1
+WORKDIR /var/www/baikal
 RUN apk add --no-cache --virtual .composer-deps git && \
-    cd /var/www/baikal && \
     wget -qO composer.json "https://raw.githubusercontent.com/sabre-io/Baikal/${BAIKAL_VERSION}/composer.json" && \
     composer require --no-interaction --no-progress --optimize-autoloader \
         "twig/twig:${TWIG_VERSION}" \
