@@ -7,6 +7,12 @@ on:
   pull_request:
     branches: ["main"]
 
+# Default GITHUB_TOKEN scope for every job. Least-privilege: read-only.
+# Jobs that need more (build needs packages:write to push to GHCR;
+# smoke-test needs packages:read to pull it back) override this below.
+permissions:
+  contents: read
+
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
