@@ -19,8 +19,8 @@ services:
       #   host smtp.example.com
       #   ...
     volumes:
-      - baikal_config:/var/www/baikal/config
-      - baikal_specific:/var/www/baikal/Specific
+      - config:/var/www/baikal/config
+      - specific:/var/www/baikal/Specific
 
   # Uncomment if you want MySQL instead of the default SQLite backend.
   # db:
@@ -32,9 +32,9 @@ services:
   #     MYSQL_USER: baikal
   #     MYSQL_PASSWORD: changeme
   #   volumes:
-  #     - baikal_db:/var/lib/mysql
+  #     - db:/var/lib/mysql
 
 volumes:
-  baikal_config:
-  baikal_specific:
-  # baikal_db:
+  config:
+  specific:
+  # db:
