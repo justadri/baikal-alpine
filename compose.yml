@@ -1,6 +1,7 @@
 services:
   baikal:
     image: justadri/baikal-alpine:latest
+    container_name: baikal
     restart: unless-stopped
     ports:
       - "8080:80"

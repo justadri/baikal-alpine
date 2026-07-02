@@ -15,24 +15,23 @@ by [s6-overlay](https://github.com/just-containers/s6-overlay).
 - Mail via msmtp (configurable through env vars, see below)
 - nginx + php-fpm both run as the `nginx` user
 
-## Build & run
+## Run
+Copy compose.yml to the directory of your choice and edit as needed. Then, from
+that directory:
 
 ```
-docker compose up --build -d
+docker compose up -d
 ```
 
 Then open http://localhost:8080/admin/ to run the install wizard.
 
 ## Persistent data
 
-Two named volumes hold everything that needs to survive a rebuild:
+Two named volumes hold everything that needs to survive:
 
 - `/var/www/baikal/config` — baikal.yaml, generated after install
 - `/var/www/baikal/Specific` — the SQLite db (if you use that backend) and
   any DAV auth backend, ACL Rules, etc.
-
-Everything else in `/var/www/baikal` comes from the image and is safe to
-throw away/rebuild.
 
 ## Mail configuration
 
@@ -55,43 +54,23 @@ the container already has both driver sets installed.
 ## Image tags
 
 Published to both `ghcr.io/justadri/baikal-alpine` and `justadri/baikal-alpine`
-on every push to `main`:
 
 | Tag | Meaning |
 | --- | --- |
 | `latest` | The current `main` |
-| `x.y.z` (e.g. `0.11.1`) | Whatever `ARG BAIKAL_VERSION` in the Dockerfile currently is — moves with `main`, doesn't require a git tag. Infra-only fixes (nginx config, php-fpm tweaks, etc.) republish under the *same* version number until you actually bump `BAIKAL_VERSION`. |
+| `x.y.z` (e.g. `0.11.1`) | Whatever `ARG BAIKAL_VERSION` in the Dockerfile currently is — moves with `main` |
 | `<short-sha>` | Pinned to that exact commit, for rollback/debugging |
 
 `latest` and the version tag always point at the same image.
-
-A separate git tag matching `BAIKAL_VERSION` (e.g. `git tag 0.11.1`) is
-optional — it doesn't change what gets published (that already happens on
-the `main` push), it just marks the point in history as a named release
-and, via GitHub Releases, gives you changelog notes. See below.
-
-## Releasing a new version
-
-1. Bump `ARG BAIKAL_VERSION` in the `Dockerfile`, commit, and merge to
-   `main` — this alone publishes `latest` and the new version tag.
-2. Optionally mark the release point in git history:
-   ```fish
-   git tag 0.11.2
-   git push origin 0.11.2
-   ```
-3. Optionally turn that into a GitHub Release:
-   ```fish
-   gh release create 0.11.2 --title 0.11.2 --generate-notes
-   ```
 
 ## Notes
 
 - `BAIKAL_SKIP_CHOWN=1` skips the ownership fix-up in cont-init.d, if
   you're managing permissions yourself on the mounted volumes.
-- Rebuild to bump the Baikal version: `docker compose build --build-arg
-  BAIKAL_VERSION=x.y.z`.
 
+## Credits
 
-Made possible by the work of [sabre.io](https://github.com/sabre-io/Baikal) 
-and [ckulka](https://github.com/ckulka/baikal-docker) with substantial help
+Baikal is the work of [Jérôme Schneider](https://github.com/jeromeschneider)
+[fruux](https://fruux.com/), and the [Baikal](https://sabre.io/baikal) volunteers. 
+Inspired by [ckulka](https://github.com/ckulka/baikal-docker) with substantial help
 from [Claude](https://claude.ai)
