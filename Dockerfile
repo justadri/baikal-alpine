@@ -7,6 +7,14 @@ FROM php:${PHP_VERSION}-fpm-alpine
 ARG BAIKAL_VERSION=0.11.1
 ARG S6_OVERLAY_VERSION=3.2.0.2
 
+LABEL org.opencontainers.image.title="baikal-alpine" \
+      org.opencontainers.image.description="Baikal (CalDAV/CardDAV server) on php:8.4-fpm-alpine + nginx, supervised by s6-overlay" \
+      org.opencontainers.image.source="https://github.com/justadri/baikal-alpine" \
+      org.opencontainers.image.documentation="https://github.com/justadri/baikal-alpine/blob/main/README.md" \
+      org.opencontainers.image.licenses="GPL-3.0-only" \
+      org.opencontainers.image.version="${BAIKAL_VERSION}" \
+      org.opencontainers.image.base.name="docker.io/library/php:${PHP_VERSION}-fpm-alpine"
+
 # --- system packages -------------------------------------------------------
 RUN apk add --no-cache \
         nginx \

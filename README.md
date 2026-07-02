@@ -2,6 +2,7 @@
 
 [![Docker Image CI](https://github.com/justadri/baikal-alpine/actions/workflows/docker-image.yml/badge.svg)](https://github.com/justadri/baikal-alpine/actions/workflows/docker-image.yml)
 [![GHCR](https://img.shields.io/badge/ghcr.io-justadri%2Fbaikal--alpine-blue?logo=github)](https://github.com/justadri/baikal-alpine/pkgs/container/baikal-alpine)
+[![Docker Hub](https://img.shields.io/docker/v/justadri/baikal-alpine?sort=semver&logo=docker&label=docker%20hub)](https://hub.docker.com/r/justadri/baikal-alpine)
 [![Baikal](https://img.shields.io/badge/baikal-0.11.1-informational)](https://github.com/sabre-io/Baikal/releases/tag/0.11.1)
 
 A single-container image for [Baikal](https://github.com/sabre-io/Baikal)
