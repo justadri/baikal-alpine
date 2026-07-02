@@ -52,6 +52,34 @@ For MySQL/Postgres, uncomment the `db` service in `docker-compose.yml` (or
 point at an existing server) and select it in the Baikal install wizard —
 the container already has both driver sets installed.
 
+## Image tags
+
+Published to both `ghcr.io/justadri/baikal-alpine` and `justadri/baikal-alpine`:
+
+| Tag | When it's built |
+| --- | --- |
+| `latest` | Every push to `main` |
+| `main` | Every push to `main` |
+| `<short-sha>` | Every push to `main` |
+| `x.y.z` (e.g. `0.11.1`) | Pushing a matching git tag — pins to that exact Baikal version |
+
+## Releasing a new version
+
+1. Bump `ARG BAIKAL_VERSION` in the `Dockerfile` to the new Baikal release,
+   commit, and merge to `main` as usual.
+2. Tag and push:
+   ```fish
+   git tag 0.11.2
+   git push origin 0.11.2
+   ```
+   CI picks up the tag push, builds with `BAIKAL_VERSION=0.11.2` baked in
+   (overriding the Dockerfile default so the tag is always authoritative
+   even if step 1 was missed), and pushes `0.11.2` to both registries.
+3. Optionally turn it into a GitHub Release:
+   ```fish
+   gh release create 0.11.2 --title 0.11.2 --generate-notes
+   ```
+
 ## Notes
 
 - `BAIKAL_SKIP_CHOWN=1` skips the ownership fix-up in cont-init.d, if
