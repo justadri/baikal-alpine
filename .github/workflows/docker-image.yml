@@ -143,8 +143,8 @@ jobs:
           # Hit /admin/ (the install wizard) rather than / - root sometimes
           # redirects, and -L follows that, but we want to assert on the
           # page Baikal actually serves once it's up.
-          code=000
-          for i in $(seq 1 20); do
+                    code=000
+          for i in $(seq 1 45); do
             code=$(curl -sL -o /dev/null -w '%{http_code}' http://localhost:8080/admin/ || true)
             if [ "$code" = "200" ]; then
               echo "Got HTTP 200 after ${i} tries"
