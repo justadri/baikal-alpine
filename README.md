@@ -3,13 +3,13 @@
 [![Docker Image CI](https://github.com/justadri/baikal-alpine/actions/workflows/docker-image.yml/badge.svg)](https://github.com/justadri/baikal-alpine/actions/workflows/docker-image.yml)
 [![GHCR](https://img.shields.io/badge/ghcr.io-justadri%2Fbaikal--alpine-blue?logo=github)](https://github.com/justadri/baikal-alpine/pkgs/container/baikal-alpine)
 [![Docker Hub](https://img.shields.io/docker/v/justadri/baikal-alpine?sort=semver&logo=docker&label=docker%20hub)](https://hub.docker.com/r/justadri/baikal-alpine)
-[![Baikal](https://img.shields.io/badge/baikal-0.11.1-informational)](https://github.com/sabre-io/Baikal/releases/tag/0.11.1)
+[![Baikal](https://img.shields.io/badge/baikal-0.12.0-informational)](https://github.com/sabre-io/Baikal/releases/tag/0.12.0)
 
 A single-container image for [Baikal](https://github.com/sabre-io/Baikal)
 (CalDAV/CardDAV server), built on `php:8.4-fpm-alpine` + nginx, supervised
 by [s6-overlay](https://github.com/just-containers/s6-overlay).
 
-- Baikal version pinned via `BAIKAL_VERSION` build arg (default: 0.11.1)
+- Baikal version pinned via `BAIKAL_VERSION` build arg (default: 0.12.0)
 - PHP extensions: pdo_sqlite, sqlite3, pdo_mysql, mysqli, pdo_pgsql, pgsql,
   dom, simplexml, xml, curl, mbstring, ctype, iconv, zip, opcache
 - Mail via msmtp (configurable through env vars, see below)
@@ -58,7 +58,7 @@ Published to both `ghcr.io/justadri/baikal-alpine` and `justadri/baikal-alpine`
 | Tag | Meaning |
 | --- | --- |
 | `latest` | The current `main` |
-| `x.y.z` (e.g. `0.11.1`) | Whatever `ARG BAIKAL_VERSION` in the Dockerfile currently is — moves with `main` |
+| `x.y.z` (e.g. `0.12.0`) | Whatever `ARG BAIKAL_VERSION` in the Dockerfile currently is — moves with `main` |
 | `<short-sha>` | Pinned to that exact commit, for rollback/debugging |
 
 `latest` and the version tag always point at the same image.
