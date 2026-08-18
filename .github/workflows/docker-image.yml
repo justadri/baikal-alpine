@@ -93,7 +93,7 @@ jobs:
           push: ${{ github.event_name == 'push' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          # On a version tag push (e.g. "0.12.0"), bake that exact Baikal
+          # On a version tag push (e.g. "0.12.1"), bake that exact Baikal
           # version into the image instead of relying on the Dockerfile's
           # ARG default staying in sync. Empty string on non-tag builds
           # means no override, so the Dockerfile default still applies.

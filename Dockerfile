@@ -4,7 +4,7 @@
 ARG PHP_VERSION=8.4
 FROM php:${PHP_VERSION}-fpm-alpine
 
-ARG BAIKAL_VERSION=0.12.0
+ARG BAIKAL_VERSION=0.12.1
 ARG S6_OVERLAY_VERSION=3.2.3.2
 
 # these pin the minimum versions we force via `composer require` after unpacking,
