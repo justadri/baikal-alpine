@@ -1,0 +1,26 @@
+name: Dependabot auto-merge
+
+# Enables auto-merge on PRs opened by Dependabot (base image + GitHub Actions
+# bumps) so they merge themselves once the existing lint/build/smoke-test
+# checks in docker-image.yml pass. Requires "Allow auto-merge" to be turned
+# on in the repo settings, and a branch protection rule on main requiring
+# those checks - otherwise this just no-ops the merge and the PR sits open.
+
+on:
+  pull_request_target:
+    branches: ["main"]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-merge:
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enable auto-merge
+        run: gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

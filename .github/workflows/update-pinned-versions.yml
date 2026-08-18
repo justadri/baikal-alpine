@@ -1,0 +1,69 @@
+name: Update pinned versions
+
+# Baikal and s6-overlay are pulled into the image via `wget` of a specific
+# GitHub release tag, pinned through ARGs in the Dockerfile - not through a
+# FROM image reference - so Dependabot's docker ecosystem can't see them
+# (see .github/dependabot.yml). This polls both projects' latest releases
+# and opens a PR bumping the ARGs when either one is behind.
+
+on:
+  schedule:
+    - cron: "17 6 * * *" # daily
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          # A PAT, not the default GITHUB_TOKEN: pushes/PRs made with the
+          # default token don't trigger other workflows (GitHub's loop-
+          # prevention), so the lint/build checks in docker-image.yml would
+          # never run on this PR and it could never satisfy branch
+          # protection to auto-merge. See peter-evans/create-pull-request's
+          # docs on "Triggering further workflow runs".
+          token: ${{ secrets.RELEASE_PAT }}
+
+      - name: Look up latest upstream releases
+        id: latest
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          baikal=$(gh api repos/sabre-io/Baikal/releases/latest --jq .tag_name)
+          s6=$(gh api repos/just-containers/s6-overlay/releases/latest --jq .tag_name)
+          s6=${s6#v}
+          echo "baikal=$baikal" >> "$GITHUB_OUTPUT"
+          echo "s6=$s6" >> "$GITHUB_OUTPUT"
+
+      - name: Bump pinned versions in Dockerfile
+        run: |
+          sed -i "s/^ARG BAIKAL_VERSION=.*/ARG BAIKAL_VERSION=${{ steps.latest.outputs.baikal }}/" Dockerfile
+          sed -i "s/^ARG S6_OVERLAY_VERSION=.*/ARG S6_OVERLAY_VERSION=${{ steps.latest.outputs.s6 }}/" Dockerfile
+
+      - name: Open PR
+        id: pr
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.RELEASE_PAT }}
+          commit-message: "bump pinned Baikal/s6-overlay versions"
+          branch: bump-pinned-versions
+          delete-branch: true
+          title: "Bump Baikal to ${{ steps.latest.outputs.baikal }}, s6-overlay to ${{ steps.latest.outputs.s6 }}"
+          body: |
+            Automated bump of the pinned upstream release versions to their latest:
+
+            - Baikal: `${{ steps.latest.outputs.baikal }}`
+            - s6-overlay: `v${{ steps.latest.outputs.s6 }}`
+
+            Opened by [update-pinned-versions.yml](../actions/workflows/update-pinned-versions.yml).
+            Merges automatically once lint/build/smoke-test pass.
+
+      - name: Enable auto-merge
+        if: steps.pr.outputs.pull-request-number != ''
+        run: gh pr merge --auto --squash "${{ steps.pr.outputs.pull-request-url }}"
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PAT }}

@@ -1,0 +1,17 @@
+version: 2
+updates:
+  # Bumps the php:${PHP_VERSION}-fpm-alpine base image in the Dockerfile's
+  # FROM line. Baikal and s6-overlay are pinned via ARGs fed into RUN wget
+  # commands, not FROM/image references, so Dependabot can't see them - the
+  # "Update pinned versions" workflow handles those two instead.
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  # Keeps the actions used in our workflows (checkout, buildx, build-push-action,
+  # hadolint-action, etc.) current.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"

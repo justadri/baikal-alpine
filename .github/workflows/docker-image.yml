@@ -47,6 +47,17 @@ jobs:
           version=$(grep -m1 '^ARG BAIKAL_VERSION=' Dockerfile | cut -d= -f2)
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
+      # Our git tags/releases are "v"-prefixed (e.g. v0.12.1), but Baikal's
+      # own release tags aren't (e.g. 0.12.1) - and BAIKAL_VERSION has to
+      # match Baikal's tag exactly since it's used verbatim in the wget URL.
+      # Strip the "v" back off before feeding it in as the build-arg.
+      - name: Determine Baikal version override from tag
+        id: tag_version
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          version="${{ github.ref_name }}"
+          echo "version=${version#v}" >> "$GITHUB_OUTPUT"
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v4
 
@@ -93,12 +104,12 @@ jobs:
           push: ${{ github.event_name == 'push' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          # On a version tag push (e.g. "0.12.1"), bake that exact Baikal
+          # On a version tag push (e.g. "v0.12.1"), bake that exact Baikal
           # version into the image instead of relying on the Dockerfile's
           # ARG default staying in sync. Empty string on non-tag builds
           # means no override, so the Dockerfile default still applies.
           build-args: |
-            ${{ startsWith(github.ref, 'refs/tags/') && format('BAIKAL_VERSION={0}', github.ref_name) || '' }}
+            ${{ steps.tag_version.outputs.version != '' && format('BAIKAL_VERSION={0}', steps.tag_version.outputs.version) || '' }}
           # Provenance/SBOM attestations get pushed as their own untagged
           # manifests alongside the per-platform ones - not worth the
           # registry clutter for a homelab image nobody's auditing supply
@@ -159,6 +170,39 @@ jobs:
       - name: Tear down
         if: always()
         run: docker rm -f baikal-smoke || true
+
+  release:
+    needs: [build, smoke-test]
+    if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Read pinned Baikal version from Dockerfile
+        id: baikal_version
+        run: |
+          version=$(grep -m1 '^ARG BAIKAL_VERSION=' Dockerfile | cut -d= -f2)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Create tag + release if this version isn't released yet
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Standard semver git-tag convention (v0.12.1), even though the
+          # Baikal release itself and BAIKAL_VERSION are unprefixed
+          # (0.12.1) - see the build job's "Determine Baikal version
+          # override from tag" step for where that distinction matters.
+          TAG: v${{ steps.baikal_version.outputs.version }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "release $TAG already exists, skipping"
+            exit 0
+          fi
+          gh release create "$TAG" \
+            --title "$TAG" \
+            --target "${{ github.sha }}" \
+            --generate-notes
 
   dockerhub-description:
     needs: build

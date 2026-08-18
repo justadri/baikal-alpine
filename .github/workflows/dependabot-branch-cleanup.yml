@@ -1,0 +1,57 @@
+name: Dependabot branch cleanup
+
+# Merged Dependabot PRs already get their branch deleted automatically (if
+# "Automatically delete head branches" is on in repo settings). This handles
+# the branches that don't go through that path - closed-without-merging,
+# ignored, or superseded PRs - which would otherwise accumulate forever.
+# Triggered by each new Dependabot PR, it sweeps every other dependabot/*
+# branch and, for ones whose last commit is more than 30 days old, closes
+# any open PR still pointing at it and deletes the branch - leaving recent
+# branches alone even if they're already superseded.
+
+on:
+  pull_request_target:
+    types: [opened]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  cleanup:
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close stale PRs and delete dependabot branches older than 30 days
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          CURRENT_BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: |
+          cutoff=$(date -u -d '30 days ago' +%s)
+
+          gh api "repos/$REPO/git/matching-refs/heads/dependabot" --jq '.[].ref' \
+            | sed 's#refs/heads/##' \
+            | while read -r branch; do
+                [ "$branch" = "$CURRENT_BRANCH" ] && continue
+
+                sha=$(gh api "repos/$REPO/git/refs/heads/$branch" --jq .object.sha)
+                committed=$(gh api "repos/$REPO/commits/$sha" --jq .commit.committer.date)
+                committed_ts=$(date -u -d "$committed" +%s)
+
+                if [ "$committed_ts" -ge "$cutoff" ]; then
+                  echo "keeping $branch (last commit $committed)"
+                  continue
+                fi
+
+                pr=$(gh pr list --repo "$REPO" --head "$branch" --state open --json number --jq '.[0].number')
+
+                if [ -n "$pr" ]; then
+                  echo "closing PR #$pr and deleting $branch (last commit $committed)"
+                  gh pr close "$pr" --repo "$REPO" --delete-branch \
+                    --comment "Closing: this branch is over 30 days old, so it's being cleaned up by the dependabot branch cleanup workflow. A fresh PR will open on the next dependency check if this update still applies."
+                else
+                  echo "deleting $branch (last commit $committed, no open PR)"
+                  gh api -X DELETE "repos/$REPO/git/refs/heads/$branch"
+                fi
+              done
