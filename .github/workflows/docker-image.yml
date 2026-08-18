@@ -22,7 +22,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Lint Dockerfile
         uses: hadolint/hadolint-action@v3.1.0
         with:
@@ -39,7 +39,7 @@ jobs:
     outputs:
       image: ${{ steps.meta.outputs.json }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Read pinned Baikal version from Dockerfile
         id: baikal_version
@@ -178,7 +178,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Read pinned Baikal version from Dockerfile
         id: baikal_version
@@ -209,7 +209,7 @@ jobs:
     if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Sync README to Docker Hub
         uses: peter-evans/dockerhub-description@v5
         with:
