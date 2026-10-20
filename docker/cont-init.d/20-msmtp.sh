@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/command/with-contenv sh
 set -e
 
 # Configure msmtp so PHP's mail() / sendmail-mode mailers work.
@@ -34,8 +34,11 @@ elif [ -n "${SMTP_HOST:-}" ]; then
         echo "logfile /dev/stdout"
     } > "$CONF"
 else
-    echo "10-msmtp: no MSMTPRC or SMTP_HOST set, mail() will not work" >&2
+    echo "20-msmtp: no MSMTPRC or SMTP_HOST set, mail() will not work" >&2
     exit 0
 fi
 
+# msmtp is invoked by PHP (php-fpm runs as nginx), so the config has to be
+# readable by that user; msmtp also refuses configs readable by anyone else.
+chown nginx:nginx "$CONF"
 chmod 600 "$CONF"
