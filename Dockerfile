@@ -22,7 +22,11 @@ LABEL org.opencontainers.image.title="baikal-alpine" \
       org.opencontainers.image.base.name="docker.io/library/php:${PHP_VERSION}-fpm-alpine"
 
 # --- system packages -------------------------------------------------------
-RUN apk add --no-cache \
+# apk upgrade pulls in security fixes (curl, libxml2, ...) that landed in Alpine
+# after the php base image was last built. DL3017 ignored on purpose.
+# hadolint ignore=DL3017
+RUN apk upgrade --no-cache && \
+    apk add --no-cache \
         nginx \
         msmtp \
         unzip \
