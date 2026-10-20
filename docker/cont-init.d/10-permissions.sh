@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/command/with-contenv sh
 set -e
 
 # Baikal needs to write its sqlite db / config here on first boot.
