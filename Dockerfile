@@ -1,6 +1,7 @@
 # baikal-alpine — PHP 8.4 + nginx + Baikal (CalDAV/CardDAV), single container
 # Based on sabre-io/Baikal: https://github.com/sabre-io/Baikal
 
+# Floating tag: any rebuild re-resolves it, so push to main to pick up new php patch releases.
 ARG PHP_VERSION=8.4
 FROM php:${PHP_VERSION}-fpm-alpine
 
